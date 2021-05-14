@@ -1,8 +1,38 @@
-- hosts: workstation
+---
+- name: Checking OpenStack provisioning
+  hosts: workstation
   gather_facts: false
   tasks:
   - name: OpenStack servers
+    os_server_info:
+      cloud: openstack
+      server: "{{ item }}"
+    loop:
+      - frontend
+      - app1
+      - app2
+      - db
+    register: r_osp_servers
+    tags:
+      - osp.smoke
+
+  - name: Assert OpenStack servers are ACTIVE
+    assert:
+      that: "item.1.status == 'ACTIVE'"
+    loop: "{{ r_osp_servers.results | subelements('openstack_servers') }}"
+    tags:
+      - osp.smoke
+
   - name: Curl website
+    uri:
+      url: "http://{{ item.1.public_v4 }}"
+      status_code: 200
+      return_content: yes
+    when: "item.1.hostname == 'frontend'"
+    loop: "{{ r_osp_servers.results | subelements('openstack_servers') }}"
+    register: webpage
+    tags:
+      - osp.smoke
 
   - name: Fail if 'Ansible has done its job' is not in the page content
     fail:
