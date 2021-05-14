@@ -3,6 +3,7 @@
     name: "{{ proj_name }}"
     scm_url: "{{ github_repo }}"
     scm_type: git
+    scm_update_on_launch: yes
     organization: Default
     state: present
     validate_certs: false
