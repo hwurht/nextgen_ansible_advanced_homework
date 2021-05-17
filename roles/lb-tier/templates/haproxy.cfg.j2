@@ -29,5 +29,5 @@ backend app-servers
     server app{{loop.index}} {{hostvars[host]['inventory_hostname']}}:8080 cookie app{{loop.index}} check
 {% endfor %}
 {% for host in groups['tag_AnsibleGroup_apps'] %}
-    server app{{loop.index}} {{hostvars[host]['inventory_hostname']}}:8080 cookie app{{loop.index}} check
+    server app{{loop.index}} {{hostvars[host]['private_ip_address']}}:8080 cookie app{{loop.index}} check
 {% endfor %}
