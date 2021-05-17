@@ -28,7 +28,7 @@
       url: "http://{{ item.1.public_v4 }}"
       status_code: 200
       return_content: yes
-    when: "item.1.hostname == 'frontend'"
+    when: "item.1.name == 'frontend'"
     loop: "{{ r_osp_servers.results | subelements('openstack_servers') }}"
     register: webpage
     tags:
