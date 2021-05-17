@@ -17,19 +17,25 @@
       #!/bin/bash
       curl -o /tmp/openstack.pub http://www.opentlc.com/download/ansible_bootcamp/openstack_keys/openstack.pub
       cat /tmp/openstack.pub >> /home/cloud-user/.ssh/authorized_keys
+      curl -o /tmp/openstack.pub http://www.opentlc.com/download/ansible_bootcamp/openstack_keys/openstack.pem
+      cat /tmp/openstack.pub >> /home/cloud-user/.ssh/authorized_keys
   loop: 
     - "{{ osp_servers.frontend }}"
     - "{{ osp_servers.app1 }}"
     - "{{ osp_servers.app2 }}"
     - "{{ osp_servers.db }}"
-
   loop_control:
     loop_var: __osp_server
+  async: 900
+  poll: 0
+  register: r_instances
 
 - name: Wait for openstack instances to complete provisioning
-  wait_for:
-    timeout: 30
-  delegate_to: localhost
+  async_status: "jid={{ item.ansible_job_id }}"
+  register: r_wait
+  until: r_wait.finished
+  retries: 900
+  loop: "{{ r_instances.results }}"
 
 - name: Add floating IP to instance
   os_floating_ip:
